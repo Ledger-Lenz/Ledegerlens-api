@@ -35,8 +35,24 @@ def test_get_score_unknown_pair_returns_404():
 
 def test_get_score_unknown_wallet_returns_404():
     pair = storage.known_pairs()[0]
-    response = client.get(f"/score/GUNKNOWNWALLET00000000000000000000000000000000000000000/{pair}")
+    # Use a valid Base32 string (A-Z, 2-7) of length 56 starting with G
+    response = client.get(f"/score/GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{pair}")
     assert response.status_code == 404
+
+
+def test_get_score_invalid_wallet_returns_400():
+    pair = storage.known_pairs()[0]
+    # Invalid length
+    response = client.get(f"/score/GSHORT/{pair}")
+    assert response.status_code == 400
+
+    # Invalid starting character
+    response = client.get(f"/score/HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{pair}")
+    assert response.status_code == 400
+
+    # Invalid characters (0 is not base32)
+    response = client.get(f"/score/G0000000000000000000000000000000000000000000000000000000/{pair}")
+    assert response.status_code == 400
 
 
 def test_recent_alerts():

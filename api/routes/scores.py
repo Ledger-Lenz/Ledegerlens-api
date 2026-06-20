@@ -15,6 +15,12 @@ def get_score(wallet: str, pair: str) -> RiskScore:
     `pair` is an asset pair identifier in `BASE/COUNTER` form, e.g.
     `XLM/USDC:GISSUER...`.
     """
+    import re
+    if not re.match(r"^G[A-Z2-7]{55}$", wallet):
+        raise HTTPException(
+            status_code=400, detail="Invalid Stellar account ID format"
+        )
+
     if pair not in storage.known_pairs():
         raise HTTPException(status_code=404, detail=f"Unknown asset pair: {pair}")
     if wallet not in storage.wallets_for_pair(pair):
